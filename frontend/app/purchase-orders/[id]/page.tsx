@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { PurchaseOrder } from '@/types'
 
 export default function PODetailPage() {
@@ -12,8 +13,13 @@ export default function PODetailPage() {
 
   const receivePO = async () => {
     if (!confirm('Receive this purchase order? This will add items to stock.')) return
-    await api.put(`/purchase-orders/${id}/status`, { status: 'RECEIVED' })
-    api.get<PurchaseOrder>(`/purchase-orders/${id}`).then(setPo).catch(() => {})
+    try {
+      await api.put(`/purchase-orders/${id}/status`, { status: 'RECEIVED' })
+      toast.success('Purchase order received')
+      api.get<PurchaseOrder>(`/purchase-orders/${id}`).then(setPo).catch(() => {})
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    }
   }
 
   if (!po) return <div>Loading...</div>

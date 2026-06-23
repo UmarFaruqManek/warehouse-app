@@ -33,6 +33,9 @@ export default function WarehouseTable({
               </td>
             </tr>
           ))}
+          {warehouses.length === 0 && (
+            <tr><td colSpan={5} className="py-4 text-center text-gray-500">No data</td></tr>
+          )}
         </tbody>
       </table>
     </div>

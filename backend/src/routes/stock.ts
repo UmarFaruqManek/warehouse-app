@@ -29,20 +29,16 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 })
 
 router.get('/alerts', async (req: AuthRequest, res: Response) => {
-  try {
-    const alerts = await prisma.$queryRawUnsafe(`
-      SELECT p.id, p.sku, p.name, p.minStock, p.unit,
-             COALESCE(SUM(s.quantity), 0) as totalStock
-      FROM Product p
-      LEFT JOIN Stock s ON s.productId = p.id
-      GROUP BY p.id
-      HAVING totalStock <= p.minStock
-      ORDER BY totalStock ASC
-    `)
-    res.json({ success: true, data: alerts })
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message })
-  }
+  const rows: any[] = await prisma.$queryRawUnsafe(`
+    SELECT p.id, p.sku, p.name, p.minStock, p.unit,
+           COALESCE(SUM(s.quantity), 0) as totalStock
+    FROM Product p
+    LEFT JOIN Stock s ON s.productId = p.id
+    GROUP BY p.id
+    HAVING COALESCE(SUM(s.quantity), 0) <= p.minStock
+    ORDER BY totalStock ASC
+  `)
+  res.json({ success: true, data: rows.map((r: any) => ({ ...r, totalStock: Number(r.totalStock) })) })
 })
 
 export default router

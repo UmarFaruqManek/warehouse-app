@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Product, PaginatedResult } from '@/types'
 import ProductTable from '@/components/products/product-table'
 import Pagination from '@/components/ui/pagination'
@@ -14,12 +15,10 @@ export default function ProductsPage() {
   useEffect(() => {
     clearTimeout(timer.current)
     timer.current = setTimeout(() => {
-      setPage(1)
-      load(1, search)
+      load(page, search)
     }, 300)
-  }, [search])
-
-  useEffect(() => { load(page, search) }, [page])
+    return () => clearTimeout(timer.current)
+  }, [page, search])
 
   const load = async (p: number, s: string) => {
     const params = new URLSearchParams()
@@ -30,8 +29,13 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this product?')) return
-    await api.delete(`/products/${id}`)
-    load(page, search)
+    try {
+      await api.delete(`/products/${id}`)
+      toast.success('Product deleted')
+      load(page, search)
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    }
   }
 
   return (

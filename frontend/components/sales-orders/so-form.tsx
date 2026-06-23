@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Product } from '@/types'
 
 export default function SOForm() {
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [customerName, setCustomerName] = useState('')
   const [items, setItems] = useState<{ productId: string; quantity: number; unitPrice: number }[]>([])
@@ -20,11 +22,19 @@ export default function SOForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await api.post('/sales-orders', {
-      customerName,
-      items: items.map(i => ({ productId: Number(i.productId), quantity: Number(i.quantity), unitPrice: Number(i.unitPrice) })),
-    })
-    router.push('/sales-orders')
+    setLoading(true)
+    try {
+      await api.post('/sales-orders', {
+        customerName,
+        items: items.map(i => ({ productId: Number(i.productId), quantity: Number(i.quantity), unitPrice: Number(i.unitPrice) })),
+      })
+      toast.success('Sales order created')
+      router.push('/sales-orders')
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -46,7 +56,9 @@ export default function SOForm() {
         ))}
         <button type="button" onClick={addItem} className="text-blue-600 text-sm">+ Add Item</button>
       </div>
-      <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Create SO</button>
+      <button type="submit" disabled={loading} className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        {loading ? 'Saving...' : 'Create SO'}
+      </button>
     </form>
   )
 }

@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import './globals.css'
+import { Toaster } from 'sonner'
+import Link from 'next/link'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
@@ -20,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <Toaster richColors />
         {isLogin ? (
           children
         ) : (
@@ -105,17 +108,16 @@ function Sidebar() {
         {menus.filter(m => m.roles.includes(role)).map(m => {
           const Icon = iconMap[m.icon] || (() => null)
           return (
-            <a
+            <Link
               key={m.href}
               href={m.href}
-              onClick={e => { e.preventDefault(); window.location.href = m.href }}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
                 pathname.startsWith(m.href) ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               <Icon />
               {m.label}
-            </a>
+            </Link>
           )
         })}
       </nav>

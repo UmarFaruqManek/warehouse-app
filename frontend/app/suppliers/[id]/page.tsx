@@ -17,7 +17,7 @@ export default function SupplierDetailPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{supplier.name}</h1>
-        <a href={`/suppliers/new`} className="text-blue-600 hover:underline">Edit</a>
+        {/* Edit link removed - no edit page available */}
       </div>
       <div className="bg-white rounded-lg shadow p-6 space-y-4">
         <div className="grid grid-cols-2 gap-4">

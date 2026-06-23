@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Supplier, PaginatedResult } from '@/types'
 import SupplierTable from '@/components/suppliers/supplier-table'
 import Pagination from '@/components/ui/pagination'
@@ -13,10 +14,11 @@ export default function SuppliersPage() {
 
   useEffect(() => {
     clearTimeout(timer.current)
-    timer.current = setTimeout(() => { setPage(1); load(1, search) }, 300)
-  }, [search])
-
-  useEffect(() => { load(page, search) }, [page])
+    timer.current = setTimeout(() => {
+      load(page, search)
+    }, 300)
+    return () => clearTimeout(timer.current)
+  }, [page, search])
 
   const load = async (p: number, s: string) => {
     const params = new URLSearchParams()
@@ -27,8 +29,13 @@ export default function SuppliersPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this supplier?')) return
-    await api.delete(`/suppliers/${id}`)
-    load(page, search)
+    try {
+      await api.delete(`/suppliers/${id}`)
+      toast.success('Supplier deleted')
+      load(page, search)
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    }
   }
 
   return (

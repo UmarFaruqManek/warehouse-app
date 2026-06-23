@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { Supplier, Product } from '@/types'
@@ -26,15 +27,25 @@ export default function ProductForm({ product }: Props) {
     api.get<Supplier[]>('/suppliers').then(setSuppliers).catch(() => {})
   }, [])
 
+  const [loading, setLoading] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     const payload = { ...form, supplierId: form.supplierId ? Number(form.supplierId) : null, minStock: Number(form.minStock), price: Number(form.price) }
-    if (product) {
-      await api.put(`/products/${product.id}`, payload)
-    } else {
-      await api.post('/products', payload)
+    try {
+      if (product) {
+        await api.put(`/products/${product.id}`, payload)
+      } else {
+        await api.post('/products', payload)
+      }
+      toast.success(product ? 'Product updated' : 'Product created')
+      router.push('/products')
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
     }
-    router.push('/products')
   }
 
   return (
@@ -76,8 +87,8 @@ export default function ProductForm({ product }: Props) {
         <label className="block text-sm font-medium mb-1">Description</label>
         <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border rounded-lg" rows={3} />
       </div>
-      <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-        {product ? 'Update' : 'Create'} Product
+      <button type="submit" disabled={loading} className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        {loading ? 'Saving...' : `${product ? 'Update' : 'Create'} Product`}
       </button>
     </form>
   )

@@ -1,4 +1,5 @@
 import express from 'express'
+import 'express-async-errors'
 import cors from 'cors'
 import { errorHandler } from './middleware/error-handler'
 import authRoutes from './routes/auth'
@@ -32,8 +33,10 @@ app.use('/api/audit-logs', auditLogRoutes)
 
 app.use(errorHandler)
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+  })
+}
 
 export default app

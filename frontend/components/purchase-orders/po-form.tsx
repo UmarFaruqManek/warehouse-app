@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Product, Supplier } from '@/types'
 
 export default function POForm() {
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [supplierId, setSupplierId] = useState('')
@@ -24,11 +26,19 @@ export default function POForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await api.post('/purchase-orders', {
-      supplierId: Number(supplierId),
-      items: items.map(i => ({ productId: Number(i.productId), quantity: Number(i.quantity), unitPrice: Number(i.unitPrice) })),
-    })
-    router.push('/purchase-orders')
+    setLoading(true)
+    try {
+      await api.post('/purchase-orders', {
+        supplierId: Number(supplierId),
+        items: items.map(i => ({ productId: Number(i.productId), quantity: Number(i.quantity), unitPrice: Number(i.unitPrice) })),
+      })
+      toast.success('Purchase order created')
+      router.push('/purchase-orders')
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -53,7 +63,9 @@ export default function POForm() {
         ))}
         <button type="button" onClick={addItem} className="text-blue-600 text-sm">+ Add Item</button>
       </div>
-      <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Create PO</button>
+      <button type="submit" disabled={loading} className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        {loading ? 'Saving...' : 'Create PO'}
+      </button>
     </form>
   )
 }

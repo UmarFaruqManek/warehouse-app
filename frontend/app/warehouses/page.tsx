@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Warehouse, PaginatedResult } from '@/types'
 import WarehouseTable from '@/components/warehouses/warehouse-table'
 import Pagination from '@/components/ui/pagination'
@@ -18,8 +19,13 @@ export default function WarehousesPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this warehouse?')) return
-    await api.delete(`/warehouses/${id}`)
-    load()
+    try {
+      await api.delete(`/warehouses/${id}`)
+      toast.success('Warehouse deleted')
+      load()
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    }
   }
 
   return (

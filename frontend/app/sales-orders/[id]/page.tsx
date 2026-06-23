@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { SalesOrder } from '@/types'
 
 export default function SODetailPage() {
@@ -12,8 +13,13 @@ export default function SODetailPage() {
 
   const shipSO = async () => {
     if (!confirm('Ship this sales order? This will deduct from stock.')) return
-    await api.put(`/sales-orders/${id}/status`, { status: 'SHIPPED' })
-    api.get<SalesOrder>(`/sales-orders/${id}`).then(setSo).catch(() => {})
+    try {
+      await api.put(`/sales-orders/${id}/status`, { status: 'SHIPPED' })
+      toast.success('Sales order shipped')
+      api.get<SalesOrder>(`/sales-orders/${id}`).then(setSo).catch(() => {})
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    }
   }
 
   if (!so) return <div>Loading...</div>

@@ -28,7 +28,7 @@ export default function TransactionTable({ transactions }: { transactions: Stock
               <td className="py-3 px-4">{t.product?.name}</td>
               <td className="py-3 px-4">{t.warehouse?.name}</td>
               <td className="py-3 px-4 font-bold">{t.quantity}</td>
-              <td className="py-3 px-4">{t.referenceType === 'ADJUST' ? 'Adjustment' : `${t.referenceType} #${t.referenceId}`}</td>
+              <td className="py-3 px-4">{t.referenceType === 'ADJUST' ? 'Adjustment' : `${t.referenceType} #${t.referenceId ?? '-'}`}</td>
               <td className="py-3 px-4">{t.user?.name || '-'}</td>
             </tr>
           ))}

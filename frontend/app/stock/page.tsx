@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { StockItem, Product, Warehouse, PaginatedResult } from '@/types'
 import StockTable from '@/components/stock/stock-table'
 import Pagination from '@/components/ui/pagination'
@@ -13,6 +14,8 @@ export default function StockPage() {
   const [page, setPage] = useState(1)
   const [showIn, setShowIn] = useState(false)
   const [showOut, setShowOut] = useState(false)
+  const [loadingIn, setLoadingIn] = useState(false)
+  const [loadingOut, setLoadingOut] = useState(false)
 
   useEffect(() => { load() }, [page, filters])
 
@@ -33,14 +36,30 @@ export default function StockPage() {
 
   const handleStockIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    await api.post('/transactions/in', { ...form, productId: Number(form.productId), warehouseId: Number(form.warehouseId), zoneId: form.zoneId ? Number(form.zoneId) : null, quantity: Number(form.quantity) })
-    setShowIn(false); setForm({ productId: '', warehouseId: '', zoneId: '', quantity: 1, note: '' }); load()
+    setLoadingIn(true)
+    try {
+      await api.post('/transactions/in', { ...form, productId: Number(form.productId), warehouseId: Number(form.warehouseId), zoneId: form.zoneId ? Number(form.zoneId) : null, quantity: Number(form.quantity) })
+      toast.success('Stock in recorded')
+      setShowIn(false); setForm({ productId: '', warehouseId: '', zoneId: '', quantity: 1, note: '' }); load()
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    } finally {
+      setLoadingIn(false)
+    }
   }
 
   const handleStockOut = async (e: React.FormEvent) => {
     e.preventDefault()
-    await api.post('/transactions/out', { ...form, productId: Number(form.productId), warehouseId: Number(form.warehouseId), zoneId: form.zoneId ? Number(form.zoneId) : null, quantity: Number(form.quantity) })
-    setShowOut(false); setForm({ productId: '', warehouseId: '', zoneId: '', quantity: 1, note: '' }); load()
+    setLoadingOut(true)
+    try {
+      await api.post('/transactions/out', { ...form, productId: Number(form.productId), warehouseId: Number(form.warehouseId), zoneId: form.zoneId ? Number(form.zoneId) : null, quantity: Number(form.quantity) })
+      toast.success('Stock out recorded')
+      setShowOut(false); setForm({ productId: '', warehouseId: '', zoneId: '', quantity: 1, note: '' }); load()
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    } finally {
+      setLoadingOut(false)
+    }
   }
 
   const Modal = ({ title, onSubmit, onClose }: any) => (
@@ -61,7 +80,7 @@ export default function StockPage() {
         </div>
         <div className="flex justify-end gap-2 mt-4">
           <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg">Cancel</button>
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Submit</button>
+          <button type="submit" disabled={loadingIn || loadingOut} className={`px-4 py-2 bg-blue-600 text-white rounded-lg ${(loadingIn || loadingOut) ? 'opacity-50 cursor-not-allowed' : ''}`}>{loadingIn || loadingOut ? 'Saving...' : 'Submit'}</button>
         </div>
       </form>
     </div>

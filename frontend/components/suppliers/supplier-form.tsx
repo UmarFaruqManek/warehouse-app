@@ -2,12 +2,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Supplier } from '@/types'
 
 interface Props { supplier?: Supplier }
 
 export default function SupplierForm({ supplier }: Props) {
   const router = useRouter()
+  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     name: supplier?.name || '',
     contact: supplier?.contact || '',
@@ -18,12 +20,20 @@ export default function SupplierForm({ supplier }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (supplier) {
-      await api.put(`/suppliers/${supplier.id}`, form)
-    } else {
-      await api.post('/suppliers', form)
+    setLoading(true)
+    try {
+      if (supplier) {
+        await api.put(`/suppliers/${supplier.id}`, form)
+      } else {
+        await api.post('/suppliers', form)
+      }
+      toast.success(supplier ? 'Supplier updated' : 'Supplier created')
+      router.push('/suppliers')
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
     }
-    router.push('/suppliers')
   }
 
   return (
@@ -40,8 +50,8 @@ export default function SupplierForm({ supplier }: Props) {
       </div>
       <div><label className="block text-sm font-medium mb-1">Address</label>
         <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 border rounded-lg" rows={3} /></div>
-      <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-        {supplier ? 'Update' : 'Create'} Supplier
+      <button type="submit" disabled={loading} className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+        {loading ? 'Saving...' : `${supplier ? 'Update' : 'Create'} Supplier`}
       </button>
     </form>
   )

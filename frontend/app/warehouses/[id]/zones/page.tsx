@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Warehouse, Zone } from '@/types'
 
 export default function ZonesPage() {
@@ -24,8 +25,13 @@ export default function ZonesPage() {
   }
 
   const saveZones = async () => {
-    await api.put(`/warehouses/${id}/zones`, { zones: zones.filter(z => z.name && z.code) })
-    setEditMode(false)
+    try {
+      await api.put(`/warehouses/${id}/zones`, { zones: zones.filter(z => z.name && z.code) })
+      toast.success('Zones saved')
+      setEditMode(false)
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong')
+    }
   }
 
   if (!warehouse) return <div>Loading...</div>
