@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("STAFF")
+  createdAt DateTime @default(now())
+  AuditLogs AuditLog[]
+  PO        PurchaseOrder[]
+  SO        SalesOrder[]
+  StockTransactions StockTransaction[]
+}
+
+model Warehouse {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String   @default("")
+  code      String   @unique
+  createdAt DateTime @default(now())
+  zones     Zone[]
+  Stock     Stock[]
+  StockTransactions StockTransaction[]
+}
+
+model Zone {
+  id          Int      @id @default(autoincrement())
+  warehouseId Int
+  name        String
+  code        String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  Stock       Stock[]
+  StockTransactions StockTransaction[]
+}
+
+model Supplier {
+  id      Int    @id @default(autoincrement())
+  name    String
+  contact String @default("")
+  phone   String @default("")
+  email   String @default("")
+  address String @default("")
+  Products Product[]
+  PO      PurchaseOrder[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  sku         String   @unique
+  name        String
+  description String   @default("")
+  category    String   @default("")
+  unit        String   @default("pcs")
+  minStock    Int      @default(0)
+  price       Float    @default(0)
+  supplierId  Int?
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  createdAt   DateTime @default(now())
+  Stock       Stock[]
+  StockTransactions StockTransaction[]
+  POItems     POItem[]
+  SOItems     SOItem[]
+}
+
+model Stock {
+  id          Int   @id @default(autoincrement())
+  productId   Int
+  warehouseId Int
+  zoneId      Int?
+  quantity    Int   @default(0)
+  product     Product  @relation(fields: [productId], references: [id])
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  zone        Zone?    @relation(fields: [zoneId], references: [id])
+  @@unique([productId, warehouseId, zoneId])
+}
+
+model StockTransaction {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  warehouseId   Int
+  zoneId        Int?
+  type          String
+  quantity      Int
+  referenceType String   @default("ADJUST")
+  referenceId   Int?
+  note          String   @default("")
+  userId        Int
+  createdAt     DateTime @default(now())
+  product       Product  @relation(fields: [productId], references: [id])
+  warehouse     Warehouse @relation(fields: [warehouseId], references: [id])
+  zone          Zone?    @relation(fields: [zoneId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+model PurchaseOrder {
+  id           Int      @id @default(autoincrement())
+  poNumber     String   @unique
+  supplierId   Int
+  status       String   @default("DRAFT")
+  orderDate    DateTime @default(now())
+  receivedDate DateTime?
+  totalAmount  Float    @default(0)
+  userId       Int
+  createdAt    DateTime @default(now())
+  supplier     Supplier @relation(fields: [supplierId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+  items        POItem[]
+}
+
+model POItem {
+  id        Int   @id @default(autoincrement())
+  poId      Int
+  productId Int
+  quantity  Int
+  unitPrice Float
+  po        PurchaseOrder @relation(fields: [poId], references: [id])
+  product   Product      @relation(fields: [productId], references: [id])
+}
+
+model SalesOrder {
+  id           Int      @id @default(autoincrement())
+  soNumber     String   @unique
+  customerName String
+  status       String   @default("DRAFT")
+  orderDate    DateTime @default(now())
+  shippedDate  DateTime?
+  userId       Int
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+  items        SOItem[]
+}
+
+model SOItem {
+  id        Int   @id @default(autoincrement())
+  soId      Int
+  productId Int
+  quantity  Int
+  unitPrice Float
+  so        SalesOrder @relation(fields: [soId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  action     String
+  entityType String
+  entityId   Int
+  oldValue   String   @default("")
+  newValue   String   @default("")
+  ipAddress  String   @default("")
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
