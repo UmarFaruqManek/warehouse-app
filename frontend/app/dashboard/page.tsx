@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ products: 0, warehouses: 0, lowStock: 0 })
 
   useEffect(() => {
-    api.get('/stock/alerts').then(setAlerts).catch(() => {})
+    api.get<any[]>('/stock/alerts').then(setAlerts).catch(() => {})
     api.get<any[]>('/products').then(d => setStats(s => ({ ...s, products: d.length }))).catch(() => {})
     api.get<any[]>('/warehouses').then(d => setStats(s => ({ ...s, warehouses: d.length }))).catch(() => {})
   }, [])

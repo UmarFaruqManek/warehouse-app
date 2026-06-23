@@ -1,21 +1,24 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
-import { StockTransaction } from '@/types'
+import { StockTransaction, PaginatedResult } from '@/types'
 import TransactionTable from '@/components/transactions/transaction-table'
+import Pagination from '@/components/ui/pagination'
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<StockTransaction[]>([])
+  const [data, setData] = useState<PaginatedResult<StockTransaction>>({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 })
+  const [page, setPage] = useState(1)
   const [filters, setFilters] = useState({ type: '', startDate: '', endDate: '' })
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [page, filters])
+
   const load = async () => {
     const params = new URLSearchParams()
+    params.append('page', String(page))
     if (filters.type) params.append('type', filters.type)
     if (filters.startDate) params.append('startDate', filters.startDate)
     if (filters.endDate) params.append('endDate', filters.endDate)
-    const data = await api.get<StockTransaction[]>(`/transactions?${params}`)
-    setTransactions(data)
+    api.get<PaginatedResult<StockTransaction>>(`/transactions?${params}`).then(setData).catch(() => {})
   }
 
   return (
@@ -25,15 +28,20 @@ export default function TransactionsPage() {
         <button onClick={load} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Refresh</button>
       </div>
       <div className="flex gap-4 mb-4">
-        <select value={filters.type} onChange={e => setFilters({ ...filters, type: e.target.value })} className="px-3 py-2 border rounded-lg">
+        <select value={filters.type} onChange={e => { setFilters({ ...filters, type: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg">
           <option value="">All Types</option>
           <option value="IN">Stock In</option>
           <option value="OUT">Stock Out</option>
         </select>
-        <input type="date" value={filters.startDate} onChange={e => setFilters({ ...filters, startDate: e.target.value })} className="px-3 py-2 border rounded-lg" />
-        <input type="date" value={filters.endDate} onChange={e => setFilters({ ...filters, endDate: e.target.value })} className="px-3 py-2 border rounded-lg" />
+        <input type="date" value={filters.startDate} onChange={e => { setFilters({ ...filters, startDate: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg" />
+        <input type="date" value={filters.endDate} onChange={e => { setFilters({ ...filters, endDate: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg" />
       </div>
-      <div className="bg-white rounded-lg shadow"><TransactionTable transactions={transactions} /></div>
+      <div className="bg-white rounded-lg shadow">
+        <TransactionTable transactions={data.data} />
+        <div className="p-4 border-t">
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+        </div>
+      </div>
     </div>
   )
 }

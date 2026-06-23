@@ -1,25 +1,38 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '@/lib/api'
-import { Product } from '@/types'
+import { Product, PaginatedResult } from '@/types'
 import ProductTable from '@/components/products/product-table'
+import Pagination from '@/components/ui/pagination'
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([])
+  const [data, setData] = useState<PaginatedResult<Product>>({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 })
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const timer = useRef<any>()
 
-  useEffect(() => { load() }, [])
-  const load = async () => { const data = await api.get<Product[]>('/products'); setProducts(data) }
+  useEffect(() => {
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => {
+      setPage(1)
+      load(1, search)
+    }, 300)
+  }, [search])
+
+  useEffect(() => { load(page, search) }, [page])
+
+  const load = async (p: number, s: string) => {
+    const params = new URLSearchParams()
+    params.append('page', String(p))
+    if (s) params.append('search', s)
+    api.get<PaginatedResult<Product>>(`/products?${params}`).then(setData).catch(() => {})
+  }
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this product?')) return
     await api.delete(`/products/${id}`)
-    load()
+    load(page, search)
   }
-
-  const filtered = products.filter(p =>
-    !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase())
-  )
 
   return (
     <div>
@@ -33,7 +46,10 @@ export default function ProductsPage() {
         className="w-full px-3 py-2 border rounded-lg mb-4"
       />
       <div className="bg-white rounded-lg shadow">
-        <ProductTable products={filtered} onDelete={handleDelete} />
+        <ProductTable products={data.data} onDelete={handleDelete} />
+        <div className="p-4 border-t">
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+        </div>
       </div>
     </div>
   )

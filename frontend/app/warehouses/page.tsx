@@ -1,17 +1,25 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
-import { Warehouse } from '@/types'
+import { Warehouse, PaginatedResult } from '@/types'
 import WarehouseTable from '@/components/warehouses/warehouse-table'
+import Pagination from '@/components/ui/pagination'
 
 export default function WarehousesPage() {
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-  useEffect(() => { api.get<Warehouse[]>('/warehouses').then(setWarehouses).catch(() => {}) }, [])
+  const [data, setData] = useState<PaginatedResult<Warehouse>>({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 })
+  const [page, setPage] = useState(1)
+
+  useEffect(() => { load() }, [page])
+  const load = async () => {
+    const params = new URLSearchParams()
+    params.append('page', String(page))
+    api.get<PaginatedResult<Warehouse>>(`/warehouses?${params}`).then(setData).catch(() => {})
+  }
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this warehouse?')) return
     await api.delete(`/warehouses/${id}`)
-    setWarehouses(prev => prev.filter(w => w.id !== id))
+    load()
   }
 
   return (
@@ -20,7 +28,12 @@ export default function WarehousesPage() {
         <h1 className="text-2xl font-bold">Warehouses</h1>
         <a href="/warehouses/new" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ New Warehouse</a>
       </div>
-      <div className="bg-white rounded-lg shadow"><WarehouseTable warehouses={warehouses} onDelete={handleDelete} /></div>
+      <div className="bg-white rounded-lg shadow">
+        <WarehouseTable warehouses={data.data} onDelete={handleDelete} />
+        <div className="p-4 border-t">
+          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+        </div>
+      </div>
     </div>
   )
 }

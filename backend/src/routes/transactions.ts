@@ -2,6 +2,7 @@ import { Router, Response } from 'express'
 import prisma from '../prisma'
 import { authenticate } from '../middleware/auth'
 import { AuthRequest } from '../types'
+import { getPagination, paginatedResponse } from '../lib/paginate'
 
 const router = Router()
 router.use(authenticate)
@@ -9,6 +10,7 @@ router.use(authenticate)
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const { type, startDate, endDate, productId } = req.query
+    const pag = getPagination(req.query)
     const where: any = {}
     if (type) where.type = type
     if (productId) where.productId = Number(productId)
@@ -17,12 +19,14 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       if (startDate) where.createdAt.gte = new Date(startDate as string)
       if (endDate) where.createdAt.lte = new Date(endDate as string)
     }
-    const transactions = await prisma.stockTransaction.findMany({
-      where,
-      include: { product: true, warehouse: true, zone: true, user: { select: { id: true, name: true } } },
-      orderBy: { createdAt: 'desc' },
-    })
-    res.json({ success: true, data: transactions })
+    const [transactions, total] = await Promise.all([
+      prisma.stockTransaction.findMany({
+        where, include: { product: true, warehouse: true, zone: true, user: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'desc' }, skip: (pag.page - 1) * pag.limit, take: pag.limit,
+      }),
+      prisma.stockTransaction.count({ where }),
+    ])
+    res.json({ success: true, data: paginatedResponse(transactions, total, pag) })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
   }

@@ -2,6 +2,7 @@ import { Router, Response } from 'express'
 import prisma from '../prisma'
 import { authenticate, authorize } from '../middleware/auth'
 import { AuthRequest } from '../types'
+import { getPagination, paginatedResponse } from '../lib/paginate'
 
 const router = Router()
 router.use(authenticate)
@@ -9,14 +10,17 @@ router.use(authenticate)
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const { status } = req.query
+    const pag = getPagination(req.query)
     const where: any = {}
     if (status) where.status = status
-    const sos = await prisma.salesOrder.findMany({
-      where,
-      include: { items: { include: { product: true } }, user: { select: { id: true, name: true } } },
-      orderBy: { createdAt: 'desc' },
-    })
-    res.json({ success: true, data: sos })
+    const [sos, total] = await Promise.all([
+      prisma.salesOrder.findMany({
+        where, include: { items: { include: { product: true } }, user: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'desc' }, skip: (pag.page - 1) * pag.limit, take: pag.limit,
+      }),
+      prisma.salesOrder.count({ where }),
+    ])
+    res.json({ success: true, data: paginatedResponse(sos, total, pag) })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
   }

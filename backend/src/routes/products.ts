@@ -2,13 +2,15 @@ import { Router, Response } from 'express'
 import prisma from '../prisma'
 import { authenticate, authorize } from '../middleware/auth'
 import { AuthRequest } from '../types'
+import { getPagination, paginatedResponse } from '../lib/paginate'
 
 const router = Router()
 router.use(authenticate)
 
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { search, category, warehouseId } = req.query
+    const { search, category } = req.query
+    const pag = getPagination(req.query)
     const where: any = {}
     if (search) {
       where.OR = [
@@ -17,12 +19,17 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       ]
     }
     if (category) where.category = category
-    const products = await prisma.product.findMany({
-      where,
-      include: { supplier: true },
-      orderBy: { name: 'asc' },
-    })
-    res.json({ success: true, data: products })
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { supplier: true },
+        orderBy: { name: 'asc' },
+        skip: (pag.page - 1) * pag.limit,
+        take: pag.limit,
+      }),
+      prisma.product.count({ where }),
+    ])
+    res.json({ success: true, data: paginatedResponse(products, total, pag) })
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message })
   }

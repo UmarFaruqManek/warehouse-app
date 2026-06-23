@@ -29,6 +29,8 @@ model Warehouse {
   zones     Zone[]
   Stock     Stock[]
   StockTransactions StockTransaction[]
+
+  @@index([name])
 }
 
 model Zone {
@@ -50,6 +52,8 @@ model Supplier {
   address String @default("")
   Products Product[]
   PO      PurchaseOrder[]
+
+  @@index([name])
 }
 
 model Product {
@@ -68,6 +72,9 @@ model Product {
   StockTransactions StockTransaction[]
   POItems     POItem[]
   SOItems     SOItem[]
+
+  @@index([name])
+  @@index([category])
 }
 
 model Stock {
@@ -98,6 +105,11 @@ model StockTransaction {
   warehouse     Warehouse @relation(fields: [warehouseId], references: [id])
   zone          Zone?    @relation(fields: [zoneId], references: [id])
   user          User     @relation(fields: [userId], references: [id])
+
+  @@index([type])
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([createdAt])
 }
 
 model PurchaseOrder {
@@ -113,6 +125,10 @@ model PurchaseOrder {
   supplier     Supplier @relation(fields: [supplierId], references: [id])
   user         User     @relation(fields: [userId], references: [id])
   items        POItem[]
+
+  @@index([status])
+  @@index([supplierId])
+  @@index([createdAt])
 }
 
 model POItem {
@@ -136,6 +152,9 @@ model SalesOrder {
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id])
   items        SOItem[]
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model SOItem {
@@ -159,4 +178,9 @@ model AuditLog {
   ipAddress  String   @default("")
   createdAt  DateTime @default(now())
   user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([action])
+  @@index([createdAt])
 }

@@ -9,7 +9,7 @@ export default function SupplierDetailPage() {
   const [supplier, setSupplier] = useState<Supplier & { Products?: any[] } | null>(null)
 
   useEffect(() => {
-    api.get(`/suppliers/${id}`).then(setSupplier).catch(() => {})
+    api.get<Supplier & { Products?: any[] }>(`/suppliers/${id}`).then(setSupplier).catch(() => {})
   }, [id])
 
   if (!supplier) return <div>Loading...</div>

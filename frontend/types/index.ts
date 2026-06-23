@@ -62,6 +62,7 @@ export interface StockTransaction {
   type: string
   quantity: number
   referenceType: string
+  referenceId: number | null
   note: string
   userId: number
   user?: User
@@ -98,6 +99,8 @@ export interface SalesOrder {
   status: string
   orderDate: string
   shippedDate: string | null
+  totalAmount: number
+  userId: number
   items: SOItem[]
 }
 
@@ -171,4 +174,12 @@ export interface SlowMoving {
   category: string
   totalStock: number
   movementCount: number
+}
+
+export interface PaginatedResult<T> {
+  data: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
