@@ -12,7 +12,7 @@ export default function WarehouseTable({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b">
+          <tr className="border-b dark:border-gray-700">
             <th className="text-left py-3 px-4">Code</th>
             <th className="text-left py-3 px-4">Name</th>
             <th className="text-left py-3 px-4">Location</th>
@@ -22,7 +22,7 @@ export default function WarehouseTable({
         </thead>
         <tbody>
           {warehouses.map(w => (
-            <tr key={w.id} className="border-b hover:bg-gray-50">
+            <tr key={w.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
               <td className="py-3 px-4 font-mono">{w.code}</td>
               <td className="py-3 px-4 font-medium">{w.name}</td>
               <td className="py-3 px-4">{w.location}</td>
@@ -34,7 +34,7 @@ export default function WarehouseTable({
             </tr>
           ))}
           {warehouses.length === 0 && (
-            <tr><td colSpan={5} className="py-4 text-center text-gray-500">No data</td></tr>
+            <tr><td colSpan={5} className="py-4 text-center text-gray-500 dark:text-gray-400">No data</td></tr>
           )}
         </tbody>
       </table>

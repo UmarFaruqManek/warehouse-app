@@ -38,19 +38,19 @@ export default function SupplierForm({ supplier }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-lg space-y-4">
-      <div><label className="block text-sm font-medium mb-1">Name</label>
-        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg" required /></div>
-      <div><label className="block text-sm font-medium mb-1">Contact Person</label>
-        <input value={form.contact} onChange={e => setForm({ ...form, contact: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+      <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Name</label>
+        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required /></div>
+      <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Contact Person</label>
+        <input value={form.contact} onChange={e => setForm({ ...form, contact: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" /></div>
       <div className="grid grid-cols-2 gap-4">
-        <div><label className="block text-sm font-medium mb-1">Phone</label>
-          <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-        <div><label className="block text-sm font-medium mb-1">Email</label>
-          <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+        <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Phone</label>
+          <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" /></div>
+        <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Email</label>
+          <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" /></div>
       </div>
-      <div><label className="block text-sm font-medium mb-1">Address</label>
-        <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 border rounded-lg" rows={3} /></div>
-      <button type="submit" disabled={loading} className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+      <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Address</label>
+        <textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" rows={3} /></div>
+      <button type="submit" disabled={loading} className={`bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
         {loading ? 'Saving...' : `${supplier ? 'Update' : 'Create'} Supplier`}
       </button>
     </form>

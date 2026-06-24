@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import { api } from '@/lib/api'
 import { Product } from '@/types'
 import ProductForm from '@/components/products/product-form'
+import { PageSkeleton } from '@/components/ui/skeleton'
 
 export default function EditProductPage() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ export default function EditProductPage() {
     api.get<Product>(`/products/${id}`).then(setProduct).catch(() => {})
   }, [id])
 
-  if (!product) return <div className="p-6">Loading...</div>
+  if (!product) return <PageSkeleton />
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Edit Product</h1>

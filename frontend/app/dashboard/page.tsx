@@ -20,25 +20,25 @@ export default function DashboardPage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-500">Products</p>
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-200 p-6 rounded-lg shadow">
+          <p className="text-gray-500 dark:text-gray-400">Products</p>
           <p className="text-3xl font-bold">{stats.products}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-500">Warehouses</p>
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-200 p-6 rounded-lg shadow">
+          <p className="text-gray-500 dark:text-gray-400">Warehouses</p>
           <p className="text-3xl font-bold">{stats.warehouses}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-500">Low Stock</p>
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-200 p-6 rounded-lg shadow">
+          <p className="text-gray-500 dark:text-gray-400">Low Stock</p>
           <p className={`text-3xl font-bold ${stats.lowStock > 0 ? 'text-red-600' : ''}`}>{stats.lowStock}</p>
         </div>
       </div>
       {alerts.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 dark:text-gray-200 rounded-lg shadow p-6">
           <h2 className="font-bold mb-4">Stock Alerts</h2>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b">
+              <tr className="border-b dark:border-gray-700">
                 <th className="text-left py-2">SKU</th>
                 <th className="text-left py-2">Product</th>
                 <th className="text-left py-2">Stock</th>
@@ -47,7 +47,7 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {alerts.map((a: any) => (
-                <tr key={a.id} className="border-b">
+                <tr key={a.id} className="border-b dark:border-gray-700">
                   <td className="py-2 font-mono">{a.sku}</td>
                   <td>{a.name}</td>
                   <td className="text-red-600 font-bold">{a.totalStock}</td>

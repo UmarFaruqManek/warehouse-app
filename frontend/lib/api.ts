@@ -25,6 +25,23 @@ async function fetchApi<T>(
   return data.data ?? data
 }
 
+export function downloadExport(endpoint: string, filename: string) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
+  fetch(`${API_BASE}/export/${endpoint}`, {
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  })
+    .then(res => res.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+    })
+}
+
 export const api = {
   get: <T>(endpoint: string) => fetchApi<T>(endpoint),
   post: <T>(endpoint: string, body: any) =>

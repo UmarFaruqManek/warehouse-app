@@ -2,12 +2,21 @@ import { Router, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
+import rateLimit from 'express-rate-limit'
 import prisma from '../prisma'
 import { authenticate, JWT_SECRET } from '../middleware/auth'
 import { AuthRequest } from '../types'
 import { validate } from '../lib/validate'
 
 const router = Router()
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, error: 'Too many login attempts, try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email'),
@@ -35,7 +44,7 @@ router.post('/register', validate(registerSchema), async (req: AuthRequest, res:
   res.status(201).json({ success: true, data: user })
 })
 
-router.post('/login', validate(loginSchema), async (req: AuthRequest, res: Response) => {
+router.post('/login', loginLimiter, validate(loginSchema), async (req: AuthRequest, res: Response) => {
   const { email, password } = req.body
   const user = await prisma.user.findUnique({ where: { email } })
   if (!user) {

@@ -28,13 +28,13 @@ export default function WarehouseForm({ onSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-lg space-y-4">
-      <div><label className="block text-sm font-medium mb-1">Code</label>
-        <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} className="w-full px-3 py-2 border rounded-lg" required /></div>
-      <div><label className="block text-sm font-medium mb-1">Name</label>
-        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg" required /></div>
-      <div><label className="block text-sm font-medium mb-1">Location</label>
-        <input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-      <button type="submit" disabled={loading} className={`bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+      <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Code</label>
+        <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required /></div>
+      <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Name</label>
+        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required /></div>
+      <div><label className="block text-sm font-medium mb-1 dark:text-gray-300">Location</label>
+        <input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" /></div>
+      <button type="submit" disabled={loading} className={`bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg hover:bg-blue-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
         {loading ? 'Saving...' : 'Create Warehouse'}
       </button>
     </form>

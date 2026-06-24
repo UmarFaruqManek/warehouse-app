@@ -1,10 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { api } from '@/lib/api'
+import { api, downloadExport } from '@/lib/api'
 import { toast } from 'sonner'
 import { StockItem, Product, Warehouse, PaginatedResult } from '@/types'
 import StockTable from '@/components/stock/stock-table'
+import { TableSkeleton } from '@/components/ui/skeleton'
 import Pagination from '@/components/ui/pagination'
+import dynamic from 'next/dynamic'
+
+const BarcodeScanner = dynamic(() => import('@/components/ui/barcode-scanner'), { ssr: false })
 
 export default function StockPage() {
   const [data, setData] = useState<PaginatedResult<StockItem>>({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 })
@@ -12,19 +16,22 @@ export default function StockPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [filters, setFilters] = useState({ warehouseId: '', productId: '' })
   const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(true)
   const [showIn, setShowIn] = useState(false)
   const [showOut, setShowOut] = useState(false)
+  const [showScanner, setShowScanner] = useState(false)
   const [loadingIn, setLoadingIn] = useState(false)
   const [loadingOut, setLoadingOut] = useState(false)
 
   useEffect(() => { load() }, [page, filters])
 
   const load = async () => {
+    setLoading(true)
     const params = new URLSearchParams()
     params.append('page', String(page))
     if (filters.warehouseId) params.append('warehouseId', filters.warehouseId)
     if (filters.productId) params.append('productId', filters.productId)
-    api.get<PaginatedResult<StockItem>>(`/stock?${params}`).then(setData).catch(() => {})
+    api.get<PaginatedResult<StockItem>>(`/stock?${params}`).then(setData).catch(() => {}).finally(() => setLoading(false))
   }
 
   useEffect(() => {
@@ -64,23 +71,26 @@ export default function StockPage() {
 
   const Modal = ({ title, onSubmit, onClose }: any) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center" onClick={onClose}>
-      <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg shadow-lg w-96" onClick={e => e.stopPropagation()}>
+      <form onSubmit={onSubmit} className="bg-white dark:bg-gray-800 dark:text-gray-200 p-6 rounded-lg shadow-lg w-96" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold mb-4">{title}</h2>
         <div className="space-y-3">
-          <select value={form.productId} onChange={e => setForm({ ...form, productId: e.target.value })} className="w-full px-3 py-2 border rounded-lg" required>
-            <option value="">Select Product</option>
-            {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
-          </select>
-          <select value={form.warehouseId} onChange={e => setForm({ ...form, warehouseId: e.target.value })} className="w-full px-3 py-2 border rounded-lg" required>
+          <div className="flex gap-2">
+            <select value={form.productId} onChange={e => setForm({ ...form, productId: e.target.value })} className="flex-1 px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required>
+              <option value="">Select Product</option>
+              {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
+            </select>
+            <button type="button" onClick={() => setShowScanner(true)} className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm">Scan</button>
+          </div>
+          <select value={form.warehouseId} onChange={e => setForm({ ...form, warehouseId: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required>
             <option value="">Select Warehouse</option>
             {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
           </select>
-          <input type="number" min="1" placeholder="Quantity" value={form.quantity} onChange={e => setForm({ ...form, quantity: Number(e.target.value) })} className="w-full px-3 py-2 border rounded-lg" required />
-          <input placeholder="Note" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+          <input type="number" min="1" placeholder="Quantity" value={form.quantity} onChange={e => setForm({ ...form, quantity: Number(e.target.value) })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required />
+          <input placeholder="Note" value={form.note} onChange={e => setForm({ ...form, note: e.target.value })} className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" />
         </div>
         <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg">Cancel</button>
-          <button type="submit" disabled={loadingIn || loadingOut} className={`px-4 py-2 bg-blue-600 text-white rounded-lg ${(loadingIn || loadingOut) ? 'opacity-50 cursor-not-allowed' : ''}`}>{loadingIn || loadingOut ? 'Saving...' : 'Submit'}</button>
+          <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg dark:border-gray-600 dark:text-gray-200">Cancel</button>
+          <button type="submit" disabled={loadingIn || loadingOut} className={`px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg ${(loadingIn || loadingOut) ? 'opacity-50 cursor-not-allowed' : ''}`}>{loadingIn || loadingOut ? 'Saving...' : 'Submit'}</button>
         </div>
       </form>
     </div>
@@ -91,28 +101,50 @@ export default function StockPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Stock</h1>
         <div className="space-x-2">
-          <button onClick={() => setShowIn(true)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Stock In</button>
-          <button onClick={() => setShowOut(true)} className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Stock Out</button>
+          <button onClick={() => downloadExport('stock/csv', 'stock.csv')} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">Export CSV</button>
+          <button onClick={() => setShowIn(true)} className="bg-green-600 dark:bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-700">Stock In</button>
+          <button onClick={() => setShowOut(true)} className="bg-orange-600 dark:bg-orange-700 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Stock Out</button>
         </div>
       </div>
       <div className="flex gap-4 mb-4">
-        <select value={filters.warehouseId} onChange={e => { setFilters({ ...filters, warehouseId: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg">
+        <select value={filters.warehouseId} onChange={e => { setFilters({ ...filters, warehouseId: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
           <option value="">All Warehouses</option>
           {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
         </select>
-        <select value={filters.productId} onChange={e => { setFilters({ ...filters, productId: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg">
+        <select value={filters.productId} onChange={e => { setFilters({ ...filters, productId: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
           <option value="">All Products</option>
           {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
-      <div className="bg-white rounded-lg shadow">
-        <StockTable stock={data.data} />
-        <div className="p-4 border-t">
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+      {loading ? (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <TableSkeleton rows={5} cols={5} />
         </div>
-      </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <StockTable stock={data.data} />
+          <div className="p-4 border-t dark:border-gray-700">
+            <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          </div>
+        </div>
+      )}
       {showIn && <Modal title="Stock In" onSubmit={handleStockIn} onClose={() => setShowIn(false)} />}
       {showOut && <Modal title="Stock Out" onSubmit={handleStockOut} onClose={() => setShowOut(false)} />}
+      {showScanner && (
+        <BarcodeScanner
+          onScan={(code) => {
+            const product = products.find(p => p.sku === code)
+            if (product) {
+              setForm({ ...form, productId: String(product.id) })
+              toast.success(`Scanned: ${product.name}`)
+            } else {
+              toast.error(`Product not found: ${code}`)
+            }
+            setShowScanner(false)
+          }}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import './globals.css'
 import { Toaster } from 'sonner'
 import Link from 'next/link'
+import ThemeToggle from '@/components/ui/theme-toggle'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Sidebar />
             <div className="flex-1 flex flex-col">
               <Navbar />
-              <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
                 {children}
               </main>
             </div>
@@ -66,6 +67,7 @@ function Sidebar() {
     { href: '/sales-orders', label: 'SO', icon: 'FileText', roles: ['ADMIN', 'STAFF'] },
     { href: '/reports', label: 'Reports', icon: 'BarChart3', roles: ['ADMIN', 'MANAGER'] },
     { href: '/audit-logs', label: 'Audit Logs', icon: 'Shield', roles: ['ADMIN'] },
+    { href: '/api-keys', label: 'API Keys', icon: 'Key', roles: ['ADMIN'] },
   ]
 
   const iconMap: Record<string, any> = {
@@ -99,11 +101,14 @@ function Sidebar() {
     Shield: () => (
       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     ),
+    Key: () => (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3z"/></svg>
+    ),
   }
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 p-4">
-      <div className="text-xl font-bold mb-8 px-2">WarehouseApp</div>
+    <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4">
+      <div className="text-xl font-bold mb-8 px-2 dark:text-gray-100">WarehouseApp</div>
       <nav className="space-y-1">
         {menus.filter(m => m.roles.includes(role)).map(m => {
           const Icon = iconMap[m.icon] || (() => null)
@@ -112,7 +117,7 @@ function Sidebar() {
               key={m.href}
               href={m.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
-                pathname.startsWith(m.href) ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'
+                pathname.startsWith(m.href) ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               <Icon />
@@ -145,11 +150,12 @@ function Navbar() {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+    <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
       <div />
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">{user?.email}</span>
-        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{user?.role}</span>
+        <ThemeToggle />
+        <span className="text-sm text-gray-600 dark:text-gray-300">{user?.email}</span>
+        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">{user?.role}</span>
         <button onClick={logout} className="text-sm text-red-600 hover:underline">Logout</button>
       </div>
     </header>

@@ -21,22 +21,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6">WarehouseApp Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-96">
+        <h1 className="text-2xl font-bold mb-6 dark:text-gray-100">WarehouseApp Login</h1>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <div className="space-y-4">
           <input
             type="email" placeholder="Email" value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg" required
+            className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required
           />
           <input
             type="password" placeholder="Password" value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg" required
+            className="w-full px-3 py-2 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required
           />
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+          <button type="submit" className="w-full bg-blue-600 dark:bg-blue-700 text-white py-2 rounded-lg hover:bg-blue-700">
             Login
           </button>
         </div>

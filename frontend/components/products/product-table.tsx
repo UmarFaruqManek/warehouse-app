@@ -12,7 +12,7 @@ export default function ProductTable({
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b">
+          <tr className="border-b dark:border-gray-700">
             <th className="text-left py-3 px-4">SKU</th>
             <th className="text-left py-3 px-4">Name</th>
             <th className="text-left py-3 px-4">Category</th>
@@ -23,7 +23,7 @@ export default function ProductTable({
         </thead>
         <tbody>
           {products.map(p => (
-            <tr key={p.id} className="border-b hover:bg-gray-50">
+            <tr key={p.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
               <td className="py-3 px-4 font-mono">{p.sku}</td>
               <td className="py-3 px-4">{p.name}</td>
               <td className="py-3 px-4">{p.category}</td>
@@ -42,7 +42,7 @@ export default function ProductTable({
             </tr>
           ))}
           {products.length === 0 && (
-            <tr><td colSpan={6} className="py-4 text-center text-gray-500">No data</td></tr>
+            <tr><td colSpan={6} className="py-4 text-center text-gray-500 dark:text-gray-400">No data</td></tr>
           )}
         </tbody>
       </table>

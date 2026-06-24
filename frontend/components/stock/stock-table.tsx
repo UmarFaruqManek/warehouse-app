@@ -6,7 +6,7 @@ export default function StockTable({ stock }: { stock: StockItem[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b">
+          <tr className="border-b dark:border-gray-700">
             <th className="text-left py-3 px-4">Product</th>
             <th className="text-left py-3 px-4">SKU</th>
             <th className="text-left py-3 px-4">Warehouse</th>
@@ -16,7 +16,7 @@ export default function StockTable({ stock }: { stock: StockItem[] }) {
         </thead>
         <tbody>
           {stock.map(s => (
-            <tr key={s.id} className="border-b hover:bg-gray-50">
+            <tr key={s.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
               <td className="py-3 px-4">{s.product?.name}</td>
               <td className="py-3 px-4 font-mono">{s.product?.sku}</td>
               <td className="py-3 px-4">{s.warehouse?.name}</td>
@@ -24,7 +24,7 @@ export default function StockTable({ stock }: { stock: StockItem[] }) {
               <td className="py-3 px-4 font-bold">{s.quantity}</td>
             </tr>
           ))}
-          {stock.length === 0 && <tr><td colSpan={5} className="py-4 text-center text-gray-500">No stock data</td></tr>}
+          {stock.length === 0 && <tr><td colSpan={5} className="py-4 text-center text-gray-500 dark:text-gray-400">No stock data</td></tr>}
         </tbody>
       </table>
     </div>

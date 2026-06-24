@@ -18,6 +18,7 @@ model User {
   PO        PurchaseOrder[]
   SO        SalesOrder[]
   StockTransactions StockTransaction[]
+  ApiKeys           ApiKey[]
 }
 
 model Warehouse {
@@ -165,6 +166,17 @@ model SOItem {
   unitPrice Float
   so        SalesOrder @relation(fields: [soId], references: [id])
   product   Product   @relation(fields: [productId], references: [id])
+}
+
+model ApiKey {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  userId    Int
+  active    Boolean  @default(true)
+  lastUsed  DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model AuditLog {

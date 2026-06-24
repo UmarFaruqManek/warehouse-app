@@ -6,7 +6,7 @@ export default function TransactionTable({ transactions }: { transactions: Stock
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b">
+          <tr className="border-b dark:border-gray-700">
             <th className="text-left py-3 px-4">Date</th>
             <th className="text-left py-3 px-4">Type</th>
             <th className="text-left py-3 px-4">Product</th>
@@ -18,10 +18,10 @@ export default function TransactionTable({ transactions }: { transactions: Stock
         </thead>
         <tbody>
           {transactions.map(t => (
-            <tr key={t.id} className="border-b hover:bg-gray-50">
+            <tr key={t.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
               <td className="py-3 px-4">{new Date(t.createdAt).toLocaleDateString('id-ID')}</td>
               <td className="py-3 px-4">
-                <span className={`px-2 py-1 rounded text-xs font-bold ${t.type === 'IN' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                <span className={`px-2 py-1 rounded text-xs font-bold ${t.type === 'IN' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}`}>
                   {t.type}
                 </span>
               </td>
@@ -32,7 +32,7 @@ export default function TransactionTable({ transactions }: { transactions: Stock
               <td className="py-3 px-4">{t.user?.name || '-'}</td>
             </tr>
           ))}
-          {transactions.length === 0 && <tr><td colSpan={7} className="py-4 text-center text-gray-500">No transactions</td></tr>}
+          {transactions.length === 0 && <tr><td colSpan={7} className="py-4 text-center text-gray-500 dark:text-gray-400">No transactions</td></tr>}
         </tbody>
       </table>
     </div>

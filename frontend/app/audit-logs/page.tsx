@@ -3,23 +3,26 @@ import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
 import { AuditLog, PaginatedResult } from '@/types'
 import AuditLogTable from '@/components/audit-logs/audit-log-table'
+import { TableSkeleton } from '@/components/ui/skeleton'
 import Pagination from '@/components/ui/pagination'
 
 export default function AuditLogsPage() {
   const [data, setData] = useState<PaginatedResult<AuditLog>>({ data: [], total: 0, page: 1, limit: 20, totalPages: 0 })
   const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ entityType: '', action: '', dateFrom: '', dateTo: '' })
 
   useEffect(() => { load() }, [page, filters])
 
   const load = async () => {
+    setLoading(true)
     const params = new URLSearchParams()
     params.append('page', String(page))
     if (filters.entityType) params.append('entityType', filters.entityType)
     if (filters.action) params.append('action', filters.action)
     if (filters.dateFrom) params.append('dateFrom', filters.dateFrom)
     if (filters.dateTo) params.append('dateTo', filters.dateTo)
-    api.get<PaginatedResult<AuditLog>>(`/audit-logs?${params}`).then(setData).catch(() => {})
+    api.get<PaginatedResult<AuditLog>>(`/audit-logs?${params}`).then(setData).catch(() => {}).finally(() => setLoading(false))
   }
 
   return (
@@ -41,12 +44,18 @@ export default function AuditLogsPage() {
         <input type="date" value={filters.dateFrom} onChange={e => { setFilters({ ...filters, dateFrom: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg" />
         <input type="date" value={filters.dateTo} onChange={e => { setFilters({ ...filters, dateTo: e.target.value }); setPage(1) }} className="px-3 py-2 border rounded-lg" />
       </div>
-      <div className="bg-white rounded-lg shadow">
-        <AuditLogTable logs={data.data} />
-        <div className="p-4 border-t">
-          <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+      {loading ? (
+        <div className="bg-white rounded-lg shadow">
+          <TableSkeleton rows={5} cols={5} />
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow">
+          <AuditLogTable logs={data.data} />
+          <div className="p-4 border-t">
+            <Pagination page={data.page} totalPages={data.totalPages} onPageChange={setPage} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
